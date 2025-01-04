@@ -81,6 +81,10 @@ foreach ($item in $items) {
         Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false
     }
 }
+    if ($item.Name -like "Yandex*" -or $item.Name -like "*yandex*") {
+        Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false
+    }
+}
 
 Get-Process -Name "Roblox*" -ErrorAction SilentlyContinue | Stop-Process -Force
 $robloxPaths = @(
