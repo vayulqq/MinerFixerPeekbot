@@ -64,6 +64,8 @@ function Run-CommandAsAdmin($url, $statusLabel) {
     $statusLabel.ForeColor = [System.Drawing.Color]::Lime
     $statusLabel.Text = 'Finished'
     $statusLabel.Visible = $true
+    Start-Sleep -Seconds 2
+    $statusLabel.Visible = $false
 }
 
 $statusLabel = New-Object System.Windows.Forms.Label
