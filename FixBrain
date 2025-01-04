@@ -68,7 +68,9 @@ $tasksToRemove = @(
     "Системное обновление Браузера Яндекс\Системное обновление Браузера Яндекс",
     "Yandex.Browser Update Service"
 )
-
+if ($item.Name -like "*Yandex*") {
+    Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false
+}
 foreach ($task in $tasksToRemove) {
     schtasks.exe /Delete /F /TN $task
 }
