@@ -1,1 +1,134 @@
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
+Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+
+$module = Get-Module -ListAvailable NtObjectManager
+if (-not $module) {
+    Install-Module -Name NtObjectManager -Force -AllowClobber -Scope CurrentUser -Confirm:$false
+}
+Import-Module NtObjectManager
+
+$processes = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di")
+foreach ($process in $processes) {
+    if (Get-Process -Name $process -ErrorAction SilentlyContinue) {
+        Stop-Process -Name $process -Force -Confirm:$false
+    }
+}
+foreach ($process in $processes) {
+    $proc = Get-Process -Name $process -ErrorAction SilentlyContinue
+    if ($proc) {
+        try {
+            Suspend-NtProcess -Name $process -ErrorAction Stop -Confirm:$false
+        } catch {}
+    }
+}
+
+foreach ($process in $processes) {
+    $proc = Get-Process -Name $process -ErrorAction SilentlyContinue
+    if ($proc) {
+        try {
+            Suspend-Process -Name $process -ErrorAction Stop -Confirm:$false
+        } catch {}
+    }
+}
+
+$registryPaths = @(
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run",
+    "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run",
+    "HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run",
+    "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunServices",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce",
+    "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run",
+    "HKLM:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run",
+    "HKCU:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Run",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunServices",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run",
+    "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"
+)
+
+$processes | ForEach-Object {
+    $process = $_
+    $registryPaths | ForEach-Object {
+        $registryPath = $_
+        if (Test-Path "$registryPath\$process") {
+            Remove-ItemProperty -Path $registryPath -Name $process -Force -Confirm:$false
+        }
+    }
+}
+
+$taskNames = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di")
+foreach ($task in $taskNames) {
+    $taskPath = "C:\Windows\System32\Tasks\$task"
+    if (Test-Path $taskPath) {
+        Remove-Item -Path $taskPath -Recurse -Force -Confirm:$false
+    }
+}
+
+$foldersToRemove = @("C:\Users\Public\Libraries\AMD", "C:\Users\Public\Libraries\directx")
+foreach ($folder in $foldersToRemove) {
+    if (Test-Path $folder) {
+        Remove-Item -Path $folder -Recurse -Force -Confirm:$false
+    }
+}
+
+$programDataPath = "C:\ProgramData\DirectX"
+if (Test-Path $programDataPath) {
+    Remove-Item -Path $programDataPath -Recurse -Force -Confirm:$false
+}
+
+$removeTempFolder = {
+    param ($tempFolderPath)
+    $files = Get-ChildItem -Path $tempFolderPath -Recurse -ErrorAction SilentlyContinue
+    foreach ($file in $files) {
+        try {
+            Remove-Item $file.FullName -Force -Recurse -Confirm:$false -ErrorAction SilentlyContinue
+        } catch {}
+    }
+}
+
+sc.exe stop "DrvSvc" -Confirm:$false
+sc.exe delete "DrvSvc" -Confirm:$false
+$filesToDelete = @("ddxdiag.exe", "SppExtFileObj.exe", "SteamUpdate.exe", "OriginPlayer.exe", "directxutil.exe", "GTXService.exe", "STXService.exe", "di.exe")
+$searchPath = "C:\"
+foreach ($file in $filesToDelete) {
+    $filePaths = Get-ChildItem -Path $searchPath -Filter $file -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+    if ($filePaths) {
+        foreach ($filePath in $filePaths) {
+            try {
+                if ($file -eq "di.exe") {
+                    $fileInfo = Get-Item -Path $filePath
+                    if ($fileInfo.Length -ge 600MB) {
+                        Remove-Item -Path $filePath -Force -Confirm:$false
+                    }
+                } else {
+                    Remove-Item -Path $filePath -Force -Confirm:$false
+                }
+            } catch {}
+        }
+    }
+}
+
+$filesToDelete = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di")
+$tasksPaths = @("C:\Windows\System32\Tasks", "C:\Windows\System32\TaskScheduler")
+foreach ($taskPath in $tasksPaths) {
+    foreach ($file in $filesToDelete) {
+        $taskFilePaths = Get-ChildItem -Path $taskPath -Filter $file -Recurse -ErrorAction SilentlyContinue | Where-Object { -not ($_.Extension -eq ".exe") } | Select-Object -ExpandProperty FullName
+        if ($taskFilePaths) {
+            foreach ($taskFilePath in $taskFilePaths) {
+                try {
+                    Remove-Item -Path $taskFilePath -Force -Confirm:$false
+                } catch {}
+            }
+        }
+    }
+}
+
+& $removeTempFolder $env:TEMP -Confirm:$false
+& $removeTempFolder $env:USERPROFILE\AppData\Local\Temp -Confirm:$false
+& $removeTempFolder "C:\Windows\Temp" -Confirm:$false
+exit
