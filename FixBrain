@@ -76,9 +76,11 @@ foreach ($task in $tasksToRemove) {
 
 $desktopPath = [Environment]::GetFolderPath("Desktop")
 $items = Get-ChildItem -Path $desktopPath -Force
+
 foreach ($item in $items) {
-    if ($item.Name -like "*Roblox*" -or $item.Name -like "*roblox*" -or $item.Name -like "*Yandex*" -or $item.Name -like "*yandex*") {
-    Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false -ErrorAction SilentlyContinue
+    if ($item.Name -like "*Roblox*" -or $item.Name -like "*Yandex*") {
+        Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false -ErrorAction SilentlyContinue
+    }
 }
 
 Get-Process -Name "Roblox*" -ErrorAction SilentlyContinue | Stop-Process -Force
@@ -98,3 +100,4 @@ $wotInstallerPath = "$env:TEMP\WoT_EU_Installer.exe"
 $webClient = New-Object System.Net.WebClient
 $webClient.DownloadFile($wotInstallerUrl, $wotInstallerPath)
 Start-Process -FilePath $wotInstallerPath
+exit
