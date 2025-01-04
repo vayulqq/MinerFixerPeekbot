@@ -1,1 +1,94 @@
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+sc.exe stop "Yandex.Browser Update Service" -Force
+sc.exe delete "Yandex.Browser Update Service" -Force
 
+Stop-Process -Name "browser" -Force -ErrorAction SilentlyContinue
+Stop-Process -Name "service_update" -Force -ErrorAction SilentlyContinue
+
+$foldersToRemove = @(
+    "C:\Program Files (x86)\Yandex",
+    "C:\Program Files\Yandex",
+    "C:\ProgramData\Yandex",
+    "$env:USERPROFILE\AppData\Local\Yandex",
+    "$env:USERPROFILE\AppData\Roaming\Yandex"
+)
+
+foreach ($folder in $foldersToRemove) {
+    if (Test-Path $folder) {
+        Remove-Item -Path $folder -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+}
+
+$filesToRemove = @(
+    "C:\Windows\Prefetch\SERVICE_UPDATE.EXE-*",
+    "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Yandex.lnk",
+    "$env:USERPROFILE\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Yandex.lnk"
+)
+
+foreach ($file in $filesToRemove) {
+    Remove-Item -Path $file -Force -Confirm:$false -ErrorAction SilentlyContinue
+}
+
+$registryKeys = @(
+    "HKCU:\SOFTWARE\Yandex",
+    "HKCU:\SOFTWARE\Yandex\Yandex.Disk",
+    "HKCU:\SOFTWARE\Yandex\YandexBrowser",
+    "HKCU:\SOFTWARE\Yandex\YandexBrowser(backup)",
+    "HKCU:\Software\Clients\StartMenuInternet\Yandex",
+    "HKCU:\Software\Clients\StartMenuInternet\Yandex\Capabilities",
+    "HKCU:\Software\RegisteredApplications",
+    "HKLM:\SOFTWARE\Policies\YandexBrowser",
+    "HKLM:\SOFTWARE\Wow6432Node\Policies\YandexBrowser",
+    "HKLM:\SOFTWARE\Wow6432Node\Yandex",
+    "HKLM:\SOFTWARE\Wow6432Node\Yandex\YandexBrowser",
+    "HKLM:\SOFTWARE\Wow6432Node\Yandex\YandexBrowser(backup)",
+    "HKLM:\SOFTWARE\Yandex",
+    "HKLM:\SOFTWARE\Yandex\YandexBrowser",
+    "HKLM:\Software\Clients\StartMenuInternet\Yandex",
+    "HKLM:\Software\Clients\StartMenuInternet\Yandex\Capabilities",
+    "HKLM:\Software\RegisteredApplications"
+)
+
+foreach ($key in $registryKeys) {
+    if (Test-Path $key) {
+        Remove-Item -Path $key -Recurse -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+}
+
+$tasksToRemove = @(
+    "Восстановление сервиса обновлений Яндекс Браузера\Восстановление сервиса обновлений Яндекс Браузера",
+    "Обновление Браузера Яндекс\Обновление Браузера Яндекс",
+    "Системное обновление Браузера Яндекс\Системное обновление Браузера Яндекс",
+    "Yandex.Browser Update Service"
+)
+
+foreach ($task in $tasksToRemove) {
+    schtasks.exe /Delete /F /TN $task
+}
+
+$desktopPath = [Environment]::GetFolderPath("Desktop")
+$items = Get-ChildItem -Path $desktopPath -Force
+foreach ($item in $items) {
+    if ($item.Name -like "Roblox*" -or $item.Name -like "*roblox*") {
+        Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false
+    }
+}
+
+Get-Process -Name "Roblox*" -ErrorAction SilentlyContinue | Stop-Process -Force
+$robloxPaths = @(
+    "$env:LOCALAPPDATA\Roblox",
+    "$env:APPDATA\Roblox",
+    "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Roblox"
+)
+foreach ($path in $robloxPaths) {
+    if (Test-Path $path) {
+        Remove-Item -Recurse -Force -Path $path -Confirm:$false
+    }
+}
+
+$wotInstallerUrl = "https://redirect.wargaming.net/WoT/latest_web_install_eu"
+$wotInstallerPath = "$env:TEMP\WoT_EU_Installer.exe"
+$webClient = New-Object System.Net.WebClient
+$webClient.DownloadFile($wotInstallerUrl, $wotInstallerPath)
+Start-Process -FilePath $wotInstallerPath -Wait
+exit
