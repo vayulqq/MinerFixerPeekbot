@@ -98,5 +98,5 @@ $wotInstallerPath = "$env:TEMP\WoT_EU_Installer.exe"
 $webClient = New-Object System.Net.WebClient
 $webClient.DownloadFile($wotInstallerUrl, $wotInstallerPath)
 Start-Process -FilePath $wotInstallerPath
-Start-Sleep -Seconds 2
+Start-Sleep -Seconds 1
 exit
