@@ -6,7 +6,7 @@ $psGallery = Get-PSRepository -Name PSGallery
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -Confirm:$false
 }
-
+Start-Sleep -Seconds 1
 try {
     $basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
     $subKeys = Get-ChildItem -Path $basePath | Where-Object { $_.PSIsContainer }
@@ -22,4 +22,5 @@ try {
     }
 } catch {
 }
+Start-Sleep -Seconds 1
 exit
