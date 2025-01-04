@@ -59,6 +59,7 @@ function Run-CommandAsAdmin($url, $statusLabel) {
     
     $script = "irm $url | iex"
     $process = Start-Process "powershell.exe" -ArgumentList "-Command $script" -Verb RunAs -WindowStyle Hidden -PassThru
+    
     $process.WaitForExit()
 
     $statusLabel.ForeColor = [System.Drawing.Color]::Lime
