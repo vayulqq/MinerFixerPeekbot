@@ -1,1 +1,18 @@
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
+try {
+    $basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
+    $subKeys = Get-ChildItem -Path $basePath | Where-Object { $_.PSIsContainer }
+
+    foreach ($subKey in $subKeys) {
+        try {
+            $parameters = Get-ItemProperty -Path $subKey.PSPath -ErrorAction SilentlyContinue
+            if ($parameters -and $parameters.PSObject.Properties.Name -contains "MinimumStackCommitInBytes") {
+                Remove-ItemProperty -Path $subKey.PSPath -Name MinimumStackCommitInBytes -ErrorAction SilentlyContinue -Confirm:$false
+            }
+        } catch {
+        }
+    }
+} catch {
+}
+exit
