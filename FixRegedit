@@ -22,4 +22,5 @@ try {
     }
 } catch {
 }
+Start-Sleep -Seconds 2
 exit
