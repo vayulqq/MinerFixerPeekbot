@@ -2,7 +2,7 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
+    Install-PackageProvider -Name NuGet -ForceBootstrap -Force -Scope CurrentUser
 }
 Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 
