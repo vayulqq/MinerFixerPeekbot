@@ -63,7 +63,6 @@ function Run-CommandAsAdmin($url, $statusLabel) {
 
     $statusLabel.ForeColor = [System.Drawing.Color]::Lime
     $statusLabel.Text = 'Finished'
-    Start-Sleep -Seconds 2
     $statusLabel.Visible = $false
 }
 
