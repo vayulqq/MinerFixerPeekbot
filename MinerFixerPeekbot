@@ -12,7 +12,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 $form = New-Object System.Windows.Forms.Form
-$form.Text = 'MinerFixerPeekbot v. 1.4 by t.me/@VayuL'
+$form.Text = 'MinerFixerPeekbot v. 1.5 by t.me/@VayuL'
 $form.Size = New-Object System.Drawing.Size(400, 350)
 $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
