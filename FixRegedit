@@ -1,8 +1,6 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Install-PackageProvider -Name NuGet -ForceBootstrap -Force -Scope CurrentUser
-}
+Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
 
 try {
     $basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
