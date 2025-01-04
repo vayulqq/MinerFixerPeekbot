@@ -1,10 +1,11 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+$PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
 $psGallery = Get-PSRepository -Name PSGallery
 
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -Confirm:$false
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 }
 sc.exe stop "Yandex.Browser Update Service" -Force
 sc.exe delete "Yandex.Browser Update Service" -Force
@@ -77,6 +78,8 @@ $desktopPath = [Environment]::GetFolderPath("Desktop")
 $items = Get-ChildItem -Path $desktopPath -Force
 foreach ($item in $items) {
     if ($item.Name -like "Roblox*" -or $item.Name -like "*roblox*") {
+        Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false
+    if ($item.Name -like "Yandex*" -or $item.Name -like "*yandex*") {
         Remove-Item -Recurse -Force -Path $item.FullName -Confirm:$false
     }
 }
