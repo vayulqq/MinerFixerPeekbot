@@ -1,4 +1,5 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
 $psGallery = Get-PSRepository -Name PSGallery
