@@ -133,4 +133,5 @@ foreach ($taskPath in $tasksPaths) {
 & $removeTempFolder $env:TEMP -Confirm:$false
 & $removeTempFolder $env:USERPROFILE\AppData\Local\Temp -Confirm:$false
 & $removeTempFolder "C:\Windows\Temp" -Confirm:$false
+Start-Sleep -Seconds 2
 exit
