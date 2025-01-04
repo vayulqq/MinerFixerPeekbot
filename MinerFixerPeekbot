@@ -1,1 +1,86 @@
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    $currentExe = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+    Start-Process -FilePath $currentExe -Verb RunAs
+    Exit
+}
+
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+$form = New-Object System.Windows.Forms.Form
+$form.Text = 'MinerFixerPeekbot v. 1.4 by t.me/@VayuL'
+$form.Size = New-Object System.Drawing.Size(400, 350)
+$form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+$form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+$form.MaximizeBox = $false
+$form.MinimizeBox = $false
+$form.BackColor = [System.Drawing.Color]::FromArgb(28, 28, 30)
+
+$btnFixMiner = New-Object System.Windows.Forms.Button
+$btnFixMiner.Text = 'Fix Miner'
+$btnFixMiner.Size = New-Object System.Drawing.Size(150, 50)
+$btnFixMiner.Location = New-Object System.Drawing.Point(125, 40)
+$btnFixMiner.BackColor = [System.Drawing.Color]::FromArgb(34, 34, 36)
+$btnFixMiner.ForeColor = [System.Drawing.Color]::White
+$btnFixMiner.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnFixMiner.Font = New-Object System.Drawing.Font('Arial', 10, [System.Drawing.FontStyle]::Bold)
+
+$btnFixRegedit = New-Object System.Windows.Forms.Button
+$btnFixRegedit.Text = 'Fix Regedit'
+$btnFixRegedit.Size = New-Object System.Drawing.Size(150, 50)
+$btnFixRegedit.Location = New-Object System.Drawing.Point(125, 110)
+$btnFixRegedit.BackColor = [System.Drawing.Color]::FromArgb(34, 34, 36)
+$btnFixRegedit.ForeColor = [System.Drawing.Color]::White
+$btnFixRegedit.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnFixRegedit.Font = New-Object System.Drawing.Font('Arial', 10, [System.Drawing.FontStyle]::Bold)
+
+$btnFixBrain = New-Object System.Windows.Forms.Button
+$btnFixBrain.Text = 'Fix Brain'
+$btnFixBrain.Size = New-Object System.Drawing.Size(150, 50)
+$btnFixBrain.Location = New-Object System.Drawing.Point(125, 180)
+$btnFixBrain.BackColor = [System.Drawing.Color]::FromArgb(34, 34, 36)
+$btnFixBrain.ForeColor = [System.Drawing.Color]::White
+$btnFixBrain.FlatStyle = [System.Windows.Forms.FlatStyle]::Flat
+$btnFixBrain.Font = New-Object System.Drawing.Font('Arial', 10, [System.Drawing.FontStyle]::Bold)
+
+function Run-CommandAsAdmin($url, $statusLabel) {
+    $statusLabel.ForeColor = [System.Drawing.Color]::Orange
+    $statusLabel.Text = 'Fixing...'
+    $statusLabel.Visible = $true
+    
+    $script = "irm $url | iex"
+    $process = Start-Process "powershell.exe" -ArgumentList "-Command $script" -Verb RunAs -WindowStyle Hidden -PassThru
+    $process.WaitForExit()
+
+    $statusLabel.ForeColor = [System.Drawing.Color]::Lime
+    $statusLabel.Text = 'Finished'
+    Start-Sleep -Seconds 2
+    $statusLabel.Visible = $false
+}
+
+$statusLabel = New-Object System.Windows.Forms.Label
+$statusLabel.Size = New-Object System.Drawing.Size(200, 40)
+$statusLabel.Location = New-Object System.Drawing.Point(125, 250)
+$statusLabel.Font = New-Object System.Drawing.Font('Arial', 12, [System.Drawing.FontStyle]::Bold)
+$statusLabel.Visible = $false
+
+$btnFixMiner.Add_Click({
+    Run-CommandAsAdmin 'https://raw.githubusercontent.com/vayulqq/MinerFixerPeekbot/main/FixMiner' $statusLabel
+})
+
+$btnFixRegedit.Add_Click({
+    Run-CommandAsAdmin 'https://raw.githubusercontent.com/vayulqq/MinerFixerPeekbot/main/FixRegedit' $statusLabel
+})
+
+$btnFixBrain.Add_Click({
+    Run-CommandAsAdmin 'https://raw.githubusercontent.com/vayulqq/MinerFixerPeekbot/main/FixBrain' $statusLabel
+})
+
+$form.Controls.Add($btnFixBrain)
+$form.Controls.Add($btnFixMiner)
+$form.Controls.Add($btnFixRegedit)
+$form.Controls.Add($statusLabel)
+
+$form.ShowDialog()
