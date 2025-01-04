@@ -1,11 +1,11 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
 $psGallery = Get-PSRepository -Name PSGallery
 
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 }
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
 sc.exe stop "Yandex.Browser Update Service" -Force
 sc.exe delete "Yandex.Browser Update Service" -Force
 
