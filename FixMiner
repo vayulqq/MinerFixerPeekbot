@@ -12,7 +12,7 @@ if (-not $module) {
 }
 Import-Module NtObjectManager
 
-$processes = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di")
+$processes = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD")
 foreach ($process in $processes) {
     if (Get-Process -Name $process -ErrorAction SilentlyContinue) {
         Stop-Process -Name $process -Force -Confirm:$false
@@ -63,7 +63,7 @@ $processes | ForEach-Object {
     }
 }
 
-$taskNames = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di")
+$taskNames = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD")
 foreach ($task in $taskNames) {
     $taskPath = "C:\Windows\System32\Tasks\$task"
     if (Test-Path $taskPath) {
@@ -71,7 +71,7 @@ foreach ($task in $taskNames) {
     }
 }
 
-$foldersToRemove = @("C:\Users\Public\Libraries\AMD", "C:\Users\Public\Libraries\directx")
+$foldersToRemove = @("C:\Users\Public\Libraries\AMD", "C:\Users\Public\Libraries\directx", "C:\Users\Public\Libraries\Fonts_5")
 foreach ($folder in $foldersToRemove) {
     if (Test-Path $folder) {
         Remove-Item -Path $folder -Recurse -Force -Confirm:$false
@@ -115,7 +115,7 @@ foreach ($file in $filesToDelete) {
     }
 }
 
-$filesToDelete = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di")
+$filesToDelete = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD")
 $tasksPaths = @("C:\Windows\System32\Tasks", "C:\Windows\System32\TaskScheduler")
 foreach ($taskPath in $tasksPaths) {
     foreach ($file in $filesToDelete) {
