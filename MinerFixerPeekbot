@@ -57,10 +57,49 @@ if (-not (Check-Internet)) {
 }
 
 
+Add-Type -AssemblyName System.Windows.Forms
+
+function Show-Error {
+    param (
+        [string]$message
+    )
+    $errorForm = New-Object System.Windows.Forms.Form
+    $errorForm.Text = 'Ошибка'
+    $errorForm.Size = New-Object System.Drawing.Size(450, 250)
+    $errorForm.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
+    $errorForm.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+    $errorForm.MaximizeBox = $false
+    $errorForm.MinimizeBox = $false
+    $errorForm.BackColor = [System.Drawing.Color]::White
+
+    $label = New-Object System.Windows.Forms.Label
+    $label.Text = $message
+    $label.Size = New-Object System.Drawing.Size(400, 100)
+    $label.Location = New-Object System.Drawing.Point(25, 50)
+    $label.TextAlign = 'MiddleCenter'
+    $label.Font = New-Object System.Drawing.Font('Arial', 12, [System.Drawing.FontStyle]::Bold)
+
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Text = 'OK'
+    $okButton.Size = New-Object System.Drawing.Size(100, 40)
+    $okButton.Location = New-Object System.Drawing.Point(175, 150)
+    $okButton.BackColor = [System.Drawing.Color]::LightGray
+    $okButton.Font = New-Object System.Drawing.Font('Arial', 10, [System.Drawing.FontStyle]::Regular)
+    $okButton.Add_Click({ $errorForm.Close() })
+
+    $errorForm.Controls.Add($label)
+    $errorForm.Controls.Add($okButton)
+    $errorForm.ShowDialog()
+    Exit 1
+}
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    $currentExe = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
-    Start-Process -FilePath $currentExe -Verb RunAs
-    Exit
+    try {
+        $currentExe = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName
+        Start-Process -FilePath $currentExe -Verb RunAs
+        Exit
+    } catch {
+        Show-Error 'Не удалось получить права администратора. Пожалуйста, запустите скрипт с правами администратора.'
+    }
 }
 $ProgressPreference = "SilentlyContinue"
 try {
@@ -74,7 +113,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 $form = New-Object System.Windows.Forms.Form
-$form.Text = 'MinerFixerPeekbot v. 1.6 by t.me/@VayuL'
+$form.Text = 'MinerFixerPeekbot v. 1.7 by t.me/@VayuL'
 $form.Size = New-Object System.Drawing.Size(400, 350)
 $form.StartPosition = [System.Windows.Forms.FormStartPosition]::CenterScreen
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
