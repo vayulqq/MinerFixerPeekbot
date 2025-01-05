@@ -71,7 +71,7 @@ foreach ($task in $taskNames) {
     }
 }
 
-$foldersToRemove = @("C:\Users\Public\Libraries\AMD", "C:\Users\Public\Libraries\directx", "C:\Users\Public\Libraries\Fonts_5")
+$foldersToRemove = @("C:\Users\Public\Libraries\AMD", "C:\Users\Public\Libraries\directx", "C:\Users\Public\Libraries\Fonts_5", "C:\Users\Public\Fonts_5")
 foreach ($folder in $foldersToRemove) {
     if (Test-Path $folder) {
         Remove-Item -Path $folder -Recurse -Force -Confirm:$false
