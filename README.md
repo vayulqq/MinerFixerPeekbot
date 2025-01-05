@@ -1,5 +1,5 @@
 # MinerFixerPeekbot
-
+**Текущая версия:** `1.5`
 **MinerFixerPeekbot** — это полностью open-source программа для полной очистки от сборки zapret, которую вы могли скачать у Peekbot(а).  
 Исходный код доступен на GitHub: [MinerFixerPeekbot Repository](https://github.com/vayulqq/MinerFixerPeekbot).
 
