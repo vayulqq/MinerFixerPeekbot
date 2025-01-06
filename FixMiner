@@ -2,7 +2,6 @@ Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
 $psGallery = Get-PSRepository -Name PSGallery
-
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -Confirm:$false
 }
@@ -11,7 +10,6 @@ if (-not $module) {
     Install-Module -Name NtObjectManager -Force -AllowClobber -Scope CurrentUser -Confirm:$false
 }
 Import-Module NtObjectManager
-
 $processes = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD")
 foreach ($process in $processes) {
     if (Get-Process -Name $process -ErrorAction SilentlyContinue) {
@@ -26,7 +24,6 @@ foreach ($process in $processes) {
         } catch {}
     }
 }
-
 foreach ($process in $processes) {
     $proc = Get-Process -Name $process -ErrorAction SilentlyContinue
     if ($proc) {
@@ -35,7 +32,6 @@ foreach ($process in $processes) {
         } catch {}
     }
 }
-
 $registryPaths = @(
     "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run",
     "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run",
@@ -52,7 +48,6 @@ $registryPaths = @(
     "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run",
     "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run"
 )
-
 $processes | ForEach-Object {
     $process = $_
     $registryPaths | ForEach-Object {
@@ -62,7 +57,6 @@ $processes | ForEach-Object {
         }
     }
 }
-
 $taskNames = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD")
 foreach ($task in $taskNames) {
     $taskPath = "C:\Windows\System32\Tasks\$task"
@@ -70,7 +64,6 @@ foreach ($task in $taskNames) {
         Remove-Item -Path $taskPath -Recurse -Force -Confirm:$false
     }
 }
-
 $currentUser = [System.Environment]::UserName
 $foldersToRemove = @(
     "C:\Users\Public\Libraries\AMD",
@@ -91,12 +84,10 @@ foreach ($folder in $foldersToRemove) {
         Remove-Item -Path $folder -Recurse -Force -Confirm:$false
     }
 }
-
 $programDataPath = "C:\ProgramData\DirectX"
 if (Test-Path $programDataPath) {
     Remove-Item -Path $programDataPath -Recurse -Force -Confirm:$false
 }
-
 $removeTempFolder = {
     param ($tempFolderPath)
     $files = Get-ChildItem -Path $tempFolderPath -Recurse -ErrorAction SilentlyContinue
@@ -106,7 +97,6 @@ $removeTempFolder = {
         } catch {}
     }
 }
-
 sc.exe stop "DrvSvc" -Confirm:$false
 sc.exe delete "DrvSvc" -Confirm:$false
 $filesToDelete = @("ddxdiag.exe", "SppExtFileObj.exe", "SteamUpdate.exe", "OriginPlayer.exe", "directxutil.exe", "GTXService.exe", "STXService.exe", "di.exe")
@@ -128,7 +118,6 @@ foreach ($file in $filesToDelete) {
         }
     }
 }
-
 $filesToDelete = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD")
 $tasksPaths = @("C:\Windows\System32\Tasks", "C:\Windows\System32\TaskScheduler")
 foreach ($taskPath in $tasksPaths) {
@@ -143,7 +132,7 @@ foreach ($taskPath in $tasksPaths) {
         }
     }
 }
-
+Clear-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Force
 & $removeTempFolder $env:TEMP -Confirm:$false
 & $removeTempFolder $env:USERPROFILE\AppData\Local\Temp -Confirm:$false
 & $removeTempFolder "C:\Windows\Temp" -Confirm:$false
