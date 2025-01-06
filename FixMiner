@@ -82,7 +82,8 @@ $foldersToRemove = @(
     "C:\Users\$currentUser\Documents\Fonts_5",
     "C:\Users\Public\Documents\AMD",
     "C:\Users\Public\Documents\directx",
-    "C:\Users\Public\Documents\Fonts_5"
+    "C:\Users\Public\Documents\Fonts_5",
+    "C:\ProgramData\Videos_5"
 )
 
 foreach ($folder in $foldersToRemove) {
