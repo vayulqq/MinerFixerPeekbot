@@ -8,7 +8,7 @@
 ---
 
 ![GitHub release](https://img.shields.io/github/v/release/vayulqq/MinerFixerPeekbot?style=for-the-badge)  
-**Текущая версия:** `1.5` — Последние улучшения и исправления.
+**Текущая версия:** `1.7` — Последние улучшения и исправления.
 
 ---
 
