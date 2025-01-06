@@ -148,7 +148,7 @@ Add-Type -AssemblyName System.Drawing
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = "Очистка файла hosts"
-$form.Size = New-Object System.Drawing.Size(600, 310)
+$form.Size = New-Object System.Drawing.Size(620, 310)
 $form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
 $form.StartPosition = "CenterScreen"
 $form.BackColor = [System.Drawing.Color]::White
