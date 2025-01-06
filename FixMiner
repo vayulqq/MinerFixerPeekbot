@@ -63,20 +63,11 @@ $processes | ForEach-Object {
     }
 }
 
-$currentUser = [System.Environment]::UserName
-$foldersToRemove = @(
-    "C:\Users\Public\Libraries\AMD",
-    "C:\Users\Public\Libraries\directx",
-    "C:\Users\Public\Libraries\Fonts_5",
-    "C:\Users\Public\Fonts_5",
-    "C:\Users\$currentUser\Documents\AMD",
-    "C:\Users\$currentUser\Documents\directx",
-    "C:\Users\$currentUser\Documents\Fonts_5"
-)
-
-foreach ($folder in $foldersToRemove) {
-    if (Test-Path -Path $folder) {
-        Remove-Item -Path $folder -Recurse -Force -Confirm:$false
+$taskNames = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD")
+foreach ($task in $taskNames) {
+    $taskPath = "C:\Windows\System32\Tasks\$task"
+    if (Test-Path $taskPath) {
+        Remove-Item -Path $taskPath -Recurse -Force -Confirm:$false
     }
 }
 
