@@ -1,6 +1,6 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
+Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
 $psGallery = Get-PSRepository -Name PSGallery
 
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
