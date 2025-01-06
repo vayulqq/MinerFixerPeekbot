@@ -132,7 +132,48 @@ foreach ($taskPath in $tasksPaths) {
         }
     }
 }
-Clear-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Force
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+$form = New-Object System.Windows.Forms.Form
+$form.Text = "Очистка файла hosts"
+$form.Size = New-Object System.Drawing.Size(600, 300)
+$form.FormBorderStyle = [System.Windows.Forms.FormBorderStyle]::FixedDialog
+$form.StartPosition = "CenterScreen"
+$form.BackColor = [System.Drawing.Color]::White
+$form.MaximizeBox = $false
+$form.MinimizeBox = $false
+$label = New-Object System.Windows.Forms.Label
+$label.Text = "Вы уверены, что хотите удалить содержимое файла hosts?"
+$label.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Regular)
+$label.ForeColor = [System.Drawing.Color]::Black
+$label.AutoSize = $true
+$label.TextAlign = 'MiddleCenter'
+$label.Location = New-Object System.Drawing.Point(50, 50)
+$form.Controls.Add($label)
+$buttonYes = New-Object System.Windows.Forms.Button
+$buttonYes.Text = "Да"
+$buttonYes.Size = New-Object System.Drawing.Size(150, 60)
+$buttonYes.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
+$buttonYes.BackColor = [System.Drawing.Color]::LightGreen
+$buttonYes.ForeColor = [System.Drawing.Color]::Black
+$buttonYes.Location = New-Object System.Drawing.Point(120, 150)
+$buttonYes.Add_Click({
+    Clear-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Force
+    $form.Close()
+})
+$form.Controls.Add($buttonYes)
+$buttonNo = New-Object System.Windows.Forms.Button
+$buttonNo.Text = "Нет"
+$buttonNo.Size = New-Object System.Drawing.Size(150, 60)
+$buttonNo.Font = New-Object System.Drawing.Font("Segoe UI", 12, [System.Drawing.FontStyle]::Bold)
+$buttonNo.BackColor = [System.Drawing.Color]::LightCoral
+$buttonNo.ForeColor = [System.Drawing.Color]::Black
+$buttonNo.Location = New-Object System.Drawing.Point(320, 150)
+$buttonNo.Add_Click({
+    $form.Close()
+})
+$form.Controls.Add($buttonNo)
+$form.ShowDialog()
 & $removeTempFolder $env:TEMP -Confirm:$false
 & $removeTempFolder $env:USERPROFILE\AppData\Local\Temp -Confirm:$false
 & $removeTempFolder "C:\Windows\Temp" -Confirm:$false
