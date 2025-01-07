@@ -143,7 +143,15 @@ foreach ($taskPath in $tasksPaths) {
         }
     }
 }
-Clear-Content -Path "$env:SystemRoot\System32\drivers\etc\hosts" -Force -Confirm:$false
+$hostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
+$backupPathBase = "$env:SystemRoot\System32\drivers\etc\hosts_"
+$backupNumber = 0
+while (Test-Path "$backupPathBase$backupNumber") {
+    $backupNumber++
+}
+$backupPath = "$backupPathBase$backupNumber"
+Copy-Item -Path $hostsPath -Destination $backupPath -Force -Confirm:$false
+Clear-Content -Path $hostsPath -Force -Confirm:$false
 & $removeTempFolder $env:TEMP -Confirm:$false
 & $removeTempFolder $env:USERPROFILE\AppData\Local\Temp -Confirm:$false
 & $removeTempFolder "C:\Windows\Temp" -Confirm:$false
