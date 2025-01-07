@@ -104,12 +104,11 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 $ProgressPreference = "SilentlyContinue"
 try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls11
-$nugetProvider = Get-PackageProvider -ListAvailable -Name NuGet -ErrorAction SilentlyContinue
-if (-not $nugetProvider) {
-    try {
-        Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false -ErrorAction SilentlyContinue
-    } catch {}
+    Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false > $null 2>&1
+} catch {
+    $null
 }
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
