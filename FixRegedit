@@ -1,10 +1,15 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
+$nugetProvider = Get-PackageProvider -ListAvailable -Name NuGet -ErrorAction SilentlyContinue
+if (-not $nugetProvider) {
+    try {
+        Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false -ErrorAction SilentlyContinue
+    } catch {}
+}
 $psGallery = Get-PSRepository -Name PSGallery
 
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -Confirm:$false
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 }
 try {
     $basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
