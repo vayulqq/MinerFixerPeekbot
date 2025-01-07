@@ -4,7 +4,7 @@ Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
 $psGallery = Get-PSRepository -Name PSGallery
 
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -Confirm:$false
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 }
 $module = Get-Module -ListAvailable NtObjectManager
 if (-not $module) {
