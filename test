@@ -1,0 +1,100 @@
+$processes = @(
+    "ddxdiag",
+    "SppExtFileObj",
+    "SteamUpdate",
+    "OriginPlayer",
+    "directxutil",
+    "GTXService",
+    "STXService",
+    "di",
+    "TMPSYSUPD",
+    "WinAMDTweak"
+)
+
+Add-Type @"
+using System;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Threading;
+
+public class ProcessUtils {
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
+
+    [DllImport("ntdll.dll")]
+    public static extern int NtSuspendProcess(IntPtr hProcess);
+
+    [DllImport("ntdll.dll")]
+    public static extern int NtSetInformationProcess(IntPtr hProcess, uint ProcessInformationClass, IntPtr pInfo, uint length);
+
+    [DllImport("ntdll.dll")]
+    public static extern int NtQueryInformationProcess(IntPtr hProcess, uint ProcessInformationClass, IntPtr pInfo, uint length, ref uint returnLength);
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PROCESS_BASIC_INFORMATION {
+        public IntPtr Reserved;
+        public IntPtr PebBaseAddress;
+        public uint AffinityMask;
+        public uint BasePriority;
+        public IntPtr UniqueProcessId;
+        public IntPtr InheritedFromUniqueProcessId;
+    }
+
+    const uint PROCESS_TERMINATE = 0x0001;
+    const uint PROCESS_QUERY_INFORMATION = 0x0400;
+    const uint PROCESS_SET_INFORMATION = 0x0200;
+    const uint ProcessBasicInformation = 0;
+
+    public static void KillProcess(string processName) {
+        try {
+            Process[] processes = Process.GetProcessesByName(processName);
+            foreach (Process process in processes) {
+                IntPtr hProcess = OpenProcess(PROCESS_TERMINATE | PROCESS_QUERY_INFORMATION, false, (uint)process.Id);
+                if (hProcess != IntPtr.Zero) {
+                    uint returnLength = 0;
+                    PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
+                    int result = NtQueryInformationProcess(hProcess, ProcessBasicInformation, IntPtr.Zero, 0, ref returnLength);
+                    if (result == 0) {
+                        uint criticalProcessFlag = 0;
+                        IntPtr ptrCriticalProcessFlag = new IntPtr(criticalProcessFlag);
+                        NtSetInformationProcess(hProcess, ProcessBasicInformation, ptrCriticalProcessFlag, sizeof(uint));
+                    }
+
+                    NtSuspendProcess(hProcess);
+                    TerminateProcess(hProcess, 0);
+                }
+            }
+        } catch (Exception ex) {
+            Write-Host "Error handling process: $ex"
+        }
+    }
+}
+"@
+
+$runspace = [runspacefactory]::CreateRunspace()
+$runspace.Open()
+$jobs = @()
+
+foreach ($process in $processes) {
+    $scriptblock = {
+        param ($processName)
+        [ProcessUtils]::KillProcess($processName)
+    }
+    $job = [powershell]::Create().AddScript($scriptblock).AddArgument($process)
+    $job.Runspace = $runspace
+    $jobs += [PSCustomObject]@{ Job = $job; ProcessName = $process }
+}
+
+$jobs | ForEach-Object {
+    $_.Job.BeginInvoke()
+}
+
+$jobs | ForEach-Object {
+    $_.Job.EndInvoke()
+    $_.Job.Dispose()
+}
+
+$runspace.Close()
