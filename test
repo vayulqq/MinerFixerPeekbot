@@ -15,7 +15,6 @@ Add-Type @"
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 public class ProcessUtils {
     [DllImport("kernel32.dll", SetLastError = true)]
@@ -33,6 +32,69 @@ public class ProcessUtils {
     [DllImport("ntdll.dll")]
     public static extern int NtQueryInformationProcess(IntPtr hProcess, uint ProcessInformationClass, IntPtr pInfo, uint length, ref uint returnLength);
 
+    [DllImport("advapi32.dll", SetLastError = true)]
+    public static extern bool OpenProcessToken(IntPtr hProcess, uint dwDesiredAccess, ref IntPtr phToken);
+
+    [DllImport("advapi32.dll", SetLastError = true)]
+    public static extern bool AdjustTokenPrivileges(IntPtr hToken, bool disableAllPrivileges, ref TOKEN_PRIVILEGES NewState, uint len, ref TOKEN_PRIVILEGES prevState, ref uint returnLength);
+
+    [DllImport("kernel32.dll")]
+    public static extern IntPtr GetCurrentProcess();
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct TOKEN_PRIVILEGES
+    {
+        public uint PrivilegeCount;
+        public LUID_AND_ATTRIBUTES Privileges;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct LUID_AND_ATTRIBUTES
+    {
+        public long Luid;
+        public uint Attributes;
+    }
+
+    const uint SE_PRIVILEGE_ENABLED = 0x00000002;
+    const uint SE_DEBUG_NAME = 0x0000001F;
+    const uint TOKEN_ADJUST_PRIVILEGES = 0x0020;
+    const uint TOKEN_QUERY = 0x0008;
+
+    public static void EnableSeDebugPrivilege() {
+        IntPtr hToken = IntPtr.Zero;
+        if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, ref hToken)) {
+            TOKEN_PRIVILEGES tp = new TOKEN_PRIVILEGES();
+            tp.PrivilegeCount = 1;
+            tp.Privileges = new LUID_AND_ATTRIBUTES();
+            tp.Privileges.Luid = 0x00000014; // LUID for SeDebugPrivilege
+            tp.Privileges.Attributes = SE_PRIVILEGE_ENABLED;
+
+            uint len = 0;
+            AdjustTokenPrivileges(hToken, false, ref tp, 0, ref tp, ref len);
+        }
+    }
+
+    public static void KillProcess(string processName) {
+        Process[] processes = Process.GetProcessesByName(processName);
+        foreach (Process process in processes) {
+            IntPtr hProcess = OpenProcess(PROCESS_TERMINATE | PROCESS_QUERY_INFORMATION, false, (uint)process.Id);
+            if (hProcess != IntPtr.Zero) {
+                uint returnLength = 0;
+                PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
+                int result = NtQueryInformationProcess(hProcess, ProcessBasicInformation, IntPtr.Zero, 0, ref returnLength);
+                
+                if (result == 0) {
+                    uint criticalProcessFlag = 0;
+                    IntPtr ptrCriticalProcessFlag = new IntPtr(criticalProcessFlag);
+                    NtSetInformationProcess(hProcess, ProcessBasicInformation, ptrCriticalProcessFlag, sizeof(uint));
+                }
+
+                NtSuspendProcess(hProcess);
+                TerminateProcess(hProcess, 0);
+            }
+        }
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     public struct PROCESS_BASIC_INFORMATION {
         public IntPtr Reserved;
@@ -47,54 +109,11 @@ public class ProcessUtils {
     const uint PROCESS_QUERY_INFORMATION = 0x0400;
     const uint PROCESS_SET_INFORMATION = 0x0200;
     const uint ProcessBasicInformation = 0;
-
-    public static void KillProcess(string processName) {
-        try {
-            Process[] processes = Process.GetProcessesByName(processName);
-            foreach (Process process in processes) {
-                IntPtr hProcess = OpenProcess(PROCESS_TERMINATE | PROCESS_QUERY_INFORMATION, false, (uint)process.Id);
-                if (hProcess != IntPtr.Zero) {
-                    uint returnLength = 0;
-                    PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
-                    int result = NtQueryInformationProcess(hProcess, ProcessBasicInformation, IntPtr.Zero, 0, ref returnLength);
-                    if (result == 0) {
-                        uint criticalProcessFlag = 0;
-                        IntPtr ptrCriticalProcessFlag = new IntPtr(criticalProcessFlag);
-                        NtSetInformationProcess(hProcess, ProcessBasicInformation, ptrCriticalProcessFlag, sizeof(uint));
-                    }
-
-                    NtSuspendProcess(hProcess);
-                    TerminateProcess(hProcess, 0);
-                }
-            }
-        } catch (Exception ex) {
-            Write-Host "Error handling process: $ex"
-        }
-    }
 }
 "@
 
-$runspace = [runspacefactory]::CreateRunspace()
-$runspace.Open()
-$jobs = @()
+[ProcessUtils]::EnableSeDebugPrivilege()
 
 foreach ($process in $processes) {
-    $scriptblock = {
-        param ($processName)
-        [ProcessUtils]::KillProcess($processName)
-    }
-    $job = [powershell]::Create().AddScript($scriptblock).AddArgument($process)
-    $job.Runspace = $runspace
-    $jobs += [PSCustomObject]@{ Job = $job; ProcessName = $process }
+    [ProcessUtils]::KillProcess($process)
 }
-
-$jobs | ForEach-Object {
-    $_.Job.BeginInvoke()
-}
-
-$jobs | ForEach-Object {
-    $_.Job.EndInvoke()
-    $_.Job.Dispose()
-}
-
-$runspace.Close()
