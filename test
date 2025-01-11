@@ -117,3 +117,27 @@ public class ProcessUtils {
 foreach ($process in $processes) {
     [ProcessUtils]::KillProcess($process)
 }
+$basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
+$subKeys = Get-ChildItem -Path $basePath -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer }
+
+function Remove-RegistryProperties {
+    param (
+        [string]$path
+    )
+    $propertiesToRemove = @("MinimumStackCommitInBytes", "Debugger")
+    
+    foreach ($property in $propertiesToRemove) {
+        try {
+            $parameters = Get-ItemProperty -Path $path -ErrorAction SilentlyContinue
+            if ($parameters.PSObject.Properties.Name -contains $property) {
+                Remove-ItemProperty -Path $path -Name $property -Force -Confirm:$false -ErrorAction SilentlyContinue
+            }
+        } catch {}
+    }
+}
+
+Remove-RegistryProperties -path $basePath
+
+foreach ($subKey in $subKeys) {
+    Remove-RegistryProperties -path $subKey.PSPath
+}
