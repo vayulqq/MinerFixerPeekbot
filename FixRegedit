@@ -6,22 +6,30 @@ $psGallery = Get-PSRepository -Name PSGallery
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 }
-try {
-    $basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
-    $subKeys = Get-ChildItem -Path $basePath | Where-Object { $_.PSIsContainer }
+function Clean-RegistryProperties {
+    param([string]$registryKeyPath)
+    try {
+        $subKeys = Get-ChildItem -Path $registryKeyPath | Where-Object { $_.PSIsContainer }
 
-    foreach ($subKey in $subKeys) {
-        try {
-            $parameters = Get-ItemProperty -Path $subKey.PSPath -ErrorAction SilentlyContinue
-            if ($parameters -and $parameters.PSObject.Properties.Name -contains "MinimumStackCommitInBytes") {
-                Remove-ItemProperty -Path $subKey.PSPath -Name MinimumStackCommitInBytes -ErrorAction SilentlyContinue -Confirm:$false
+        foreach ($subKey in $subKeys) {
+            try {
+                $parameters = Get-ItemProperty -Path $subKey.PSPath -ErrorAction SilentlyContinue
+                if ($parameters -and $parameters.PSObject.Properties.Name -contains "MinimumStackCommitInBytes") {
+                    Remove-ItemProperty -Path $subKey.PSPath -Name MinimumStackCommitInBytes -ErrorAction SilentlyContinue -Confirm:$false
+                }
+                if ($parameters -and $parameters.PSObject.Properties.Name -contains "Debugger") {
+                    Remove-ItemProperty -Path $subKey.PSPath -Name Debugger -ErrorAction SilentlyContinue -Confirm:$false
+                }
+            } catch {
+                Write-Error "Error accessing or cleaning registry key: $($subKey.PSPath)"
             }
-            if ($parameters -and $parameters.PSObject.Properties.Name -contains "Debugger") {
-                Remove-ItemProperty -Path $subKey.PSPath -Name Debugger -ErrorAction SilentlyContinue -Confirm:$false
-            }
-        } catch {
+            
+            # Recursively clean properties in the subkey
+            Clean-RegistryProperties -registryKeyPath $subKey.PSPath
         }
+    } catch {
+        Write-Error "Error accessing registry path: $registryKeyPath"
     }
-} catch {
 }
-exit
+$basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
+Clean-RegistryProperties -registryKeyPath $basePath
