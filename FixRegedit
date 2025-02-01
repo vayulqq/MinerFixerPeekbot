@@ -18,7 +18,7 @@ function Clean-RegistryProperties {
     param([string]$registryKeyPath)
 
     try {
-        $subKeys = Get-ChildItem -Path $registryKeyPath | Where-Object { $_.PSIsContainer }
+        $subKeys = Get-ChildItem -Path $registryKeyPath -ErrorAction SilentlyContinue | Where-Object { $_.PSIsContainer }
 
         foreach ($subKey in $subKeys) {
             try {
