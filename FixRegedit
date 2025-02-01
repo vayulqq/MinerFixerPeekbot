@@ -23,8 +23,6 @@ function Clean-RegistryProperties {
             } catch {
                 Write-Error "Error accessing or cleaning registry key: $($subKey.PSPath)"
             }
-            
-            # Recursively clean properties in the subkey
             Clean-RegistryProperties -registryKeyPath $subKey.PSPath
         }
     } catch {
