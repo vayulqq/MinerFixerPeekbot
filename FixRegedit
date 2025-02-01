@@ -31,3 +31,4 @@ function Clean-RegistryProperties {
 }
 $basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
 Clean-RegistryProperties -registryKeyPath $basePath
+exit
