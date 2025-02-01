@@ -6,7 +6,7 @@ $psGallery = Get-PSRepository -Name PSGallery
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
 }
-function Clean-RegistryProperties {
+ffunction Clean-RegistryProperties {
     param([string]$registryKeyPath)
 
     try {
@@ -26,7 +26,11 @@ function Clean-RegistryProperties {
         }
     } catch {}
 }
-
-$basePath = "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
-Clean-RegistryProperties -registryKeyPath $basePath
+$basePaths = @(
+    "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
+)
+foreach ($basePath in $basePaths) {
+    Clean-RegistryProperties -registryKeyPath $basePath
+}
 exit
