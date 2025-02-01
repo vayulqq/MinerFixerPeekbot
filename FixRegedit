@@ -30,7 +30,13 @@ $basePaths = @(
     "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
     "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
     "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
-    "HKCU:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
+    "HKCU:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKCR:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKCR:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKU:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKU:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKCC:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKCC:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
 )
 foreach ($basePath in $basePaths) {
     Clean-RegistryProperties -registryKeyPath $basePath
