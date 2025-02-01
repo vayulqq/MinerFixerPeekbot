@@ -1,10 +1,10 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -Confirm:$false
-$psGallery = Get-PSRepository -Name PSGallery
+Install-PackageProvider -Name NuGet -Force -Scope CurrentUser -ErrorAction SilentlyContinue -Confirm:$false
+$psGallery = Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue
 
 if ($psGallery.InstallationPolicy -ne 'Trusted') {
-    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue
 }
 $module = Get-Module -ListAvailable NtObjectManager
 if (-not $module) {
