@@ -37,6 +37,8 @@ function Clean-RegistryProperties {
 $basePaths = @(
     "HKLM:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
     "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
+    "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options",
+    "HKCU:\SOFTWARE\WOW6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options"
 )
 foreach ($basePath in $basePaths) {
     Clean-RegistryProperties -registryKeyPath $basePath
