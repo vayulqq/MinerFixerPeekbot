@@ -12,7 +12,7 @@ if (-not $module) {
 }
 Import-Module NtObjectManager
 
-$processes = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD", "WinAMDTweak")
+$processes = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD", "WinAMDTweak", "sgrmbroker")
 foreach ($process in $processes) {
     if (Get-Process -Name $process -ErrorAction SilentlyContinue) {
         Stop-Process -Name $process -Force -Confirm:$false
@@ -63,7 +63,7 @@ $processes | ForEach-Object {
     }
 }
 
-$taskNames = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD", "WinAMDTweak")
+$taskNames = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD", "WinAMDTweak", "sgrmbroker")
 foreach ($task in $taskNames) {
     $taskPath = "C:\Windows\System32\Tasks\$task"
     if (Test-Path $taskPath) {
@@ -116,7 +116,7 @@ foreach ($file in $filesToDelete) {
     if ($filePaths) {
         foreach ($filePath in $filePaths) {
             try {
-                if ($file -eq "di.exe") {
+                if ($file -eq "di.exe" -or $file -eq "sgrmbroker.exe") {
                     $fileInfo = Get-Item -Path $filePath
                     if ($fileInfo.Length -ge 600MB) {
                         Remove-Item -Path $filePath -Force -Confirm:$false
@@ -129,7 +129,7 @@ foreach ($file in $filesToDelete) {
     }
 }
 
-$filesToDelete = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD", "WinAMDTweak")
+$filesToDelete = @("ddxdiag", "SppExtFileObj", "SteamUpdate", "OriginPlayer", "directxutil", "GTXService", "STXService", "di", "TMPSYSUPD", "WinAMDTweak", "sgrmbroker")
 $tasksPaths = @("C:\Windows\System32\Tasks", "C:\Windows\System32\TaskScheduler")
 foreach ($taskPath in $tasksPaths) {
     foreach ($file in $filesToDelete) {
