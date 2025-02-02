@@ -41,4 +41,18 @@ $basePaths = @(
 foreach ($basePath in $basePaths) {
     Clean-RegistryProperties -registryKeyPath $basePath
 }
+$applockerPaths = @(
+    "HKLM:\SOFTWARE\Policies\Microsoft\Windows\SrpV2",
+    "HKLM:\SYSTEM\CurrentControlSet\Control\SrpV2",
+    "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\SrpV2",
+    "HKCU:\SOFTWARE\Policies\Microsoft\Windows\SrpV2",
+    "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\SrpV2",
+    "HKCU:\SYSTEM\CurrentControlSet\Control\SrpV2"
+)
+
+foreach ($path in $applockerPaths) {
+    if (Test-Path $path) {
+        Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue -Confirm:$false
+    }
+}
 exit
